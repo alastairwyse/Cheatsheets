@@ -51,7 +51,7 @@ def get_user_to_entity_mappings(self, user: TUser) -> Iterable[Tuple[str, str]]:
     )
     raw_results = self._send_get_request(url)
     results: Iterable[Tuple[str, str]] = self._json_to_iterable_converter.convert_to_iterable_of_tuples(
-        raw_results, # type: ignore
+        raw_results, # type: ignore[assignment]
         self._ENTITY_TYPE_JSON_NAME, 
         self._ENTITY_JSON_NAME, 
         StringUniqueStringifier(), 
@@ -60,6 +60,8 @@ def get_user_to_entity_mappings(self, user: TUser) -> Iterable[Tuple[str, str]]:
     
     return results
 ```
+
+[This page](https://mypy.readthedocs.io/en/stable/error_code_list.html) lists some of the Mypy-generated errors which can be referenced in the square brackets to make the declaration more specified.  For non-Mypy-generated errors, the square backets can be omitted (just use '# type: ignore').
 
 Really good reference for these in [this post](https://stackoverflow.com/questions/68446642/how-do-i-get-pylance-to-ignore-the-possibility-of-none).
 
