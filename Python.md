@@ -107,6 +107,17 @@ Class definition should be indented within another class, and follow the convent
                 raise ValueError("Unhandled ApplicationScreen value '{0}'.".format(input_object))
 ```
 
+#### Syntax for class constants
+
+```python
+class AccessManagerClient(AccessManagerClientBase, AccessManagerEventProcessor, AccessManagerQueryProcessor, Generic[TUser, TGroup, TComponent, TAccess]):
+
+    _USER_JSON_NAME: str = "user"
+    _GROUP_JSON_NAME: str = "group"
+```
+
+As per [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#3164-guidelines-derived-from-guidos-recommendations)
+
 #### Exception equivalent to C#
 
 | C# Exception | Python Erro/Exception | Notes |
