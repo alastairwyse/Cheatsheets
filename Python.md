@@ -120,8 +120,8 @@ As per [Google Python Style Guide](https://google.github.io/styleguide/pyguide.h
 
 #### Exception equivalent to C#
 
-| C# Exception | Python Erro/Exception | Notes |
-| ------------ | --------------------- | ----- |
+| C# Exception | Python Error/Exception | Notes |
+| ------------ | ---------------------- | ----- |
 | ArgumentException | ValueError | Includes C# exceptions derived from ArgumentException... ArgumentNullException, ArgumentOutOfRangeException, etc... |
 
 #### Asserting an exception message in unit tests
@@ -190,7 +190,7 @@ def test_add_user_connection_error(self, mock_requests: requests)
 mock_requests.post = MagicMock(side_effect=ConnectionError)
 ```
 
-... and for a succes case...
+... and for a success case...
 
 ```python
 mock_response = MagicMock()
