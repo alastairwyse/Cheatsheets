@@ -97,7 +97,7 @@ String.format(
 | C# Exception | Java Error/Exception | Notes |
 | ------------ | -------------------- | ----- |
 | ArgumentException | IllegalArgumentException | Includes C# exceptions derived from ArgumentException... ArgumentOutOfRangeException, etc... |
-| ArgumentNullException | NullPointerException | TODO - Need to check this is an appropriate use in Java |
+| ArgumentNullException | NullPointerException | Many conflicting opinions on this... although apparently [many JDK methods use NullPointerException for null parameters](https://www.baeldung.com/java-illegalargumentexception-or-nullpointerexception#2-its-consistent-with-jdk-apis).  Likely choose to use or not and then ensure it's consistent throughout a solution. |
 
 #### Deriving from Exception
 
@@ -203,7 +203,12 @@ public int hashCode() {
 }
 ```
 
+#### Implementing hashCode() for model/container classes with multiple properties...
 
-```java
+Can use [Objects.hash()](https://docs.oracle.com/javase/8/docs/api/java/util/Objects.html#hash-java.lang.Object...-).  Seems to be similar to C# [HashCode.Combine()](https://learn.microsoft.com/en-us/dotnet/api/system.hashcode.combine?view=net-8.0).
 
-```
+
+#### Springboot
+
+See [JavaTaskManager](https://github.com/alastairwyse/JavaTaskManager?tab=readme-ov-file#spring-boot-and-aspnet-core-comparison) for a comparison between Springboot and ASP.NET Core.
+
