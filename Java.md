@@ -92,6 +92,105 @@ String.format(
 )
 ```
 
+#### C# Action and Func equivalents
+
+You have the [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html), [Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html), [Consumer](https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html), and [Predicate](https://docs.oracle.com/javase/8/docs/api/java/util/function/Predicate.html) interfaces, but they don't support varying numbers of generic parameters, so usefulness is limited.  These are part of the so-called 'zoo' of [various function interfaces](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html).
+
+Taking a typical real-wordl scenario where you want to create a function which can be passed around and used like a variable... e.g. create a HashMap which stores a set of functions keyed by a value... e.g. we want a HashMap which contains a set of math operations.  First define the keys for the HashMap as enums...
+
+```java
+protected enum MathsOperation {
+    ADD, 
+    SUBTRACT, 
+    MULTIPLY, 
+    DIVIDE
+}
+```
+
+Then define an interface with a method implementing the signature for the math operations...
+
+```java
+protected interface MathsOperationImplementation {
+
+    public double Implement(double parameter1, double parameter2);
+}
+```
+
+We can define the values of the HashMap as [Anonymous Classes](https://docs.oracle.com/javase/tutorial/java/javaOO/anonymousclasses.html)...
+
+```java
+var mathsOperationImplementations = new HashMap<MathsOperation, MathsOperationImplementation>();
+mathsOperationImplementations.put(
+    MathsOperation.ADD, 
+    new MathsOperationImplementation() {
+        @Override
+        public double Implement(double parameter1, double parameter2) {
+            return parameter1 + parameter2;
+        }
+    }
+);
+mathsOperationImplementations.put(
+    MathsOperation.SUBTRACT, 
+    new MathsOperationImplementation() {
+        @Override
+        public double Implement(double parameter1, double parameter2) {
+            return parameter1 - parameter2;
+        }
+    }
+);
+// etc...
+```
+
+An alternative is to make the HashMap value one of the 'zoo' methods mentioned above ([BiFunction](https://docs.oracle.com/javase/8/docs/api/java/util/function/BiFunction.html) in this case).  Then the function can be implemented as a lambda...
+
+```java
+var mathsOperationImplementations2 = new HashMap<MathsOperation, BiFunction<Double, Double, Double>>();
+mathsOperationImplementations2.put(
+    MathsOperation.ADD, 
+    (Double parameter1, Double parameter2) -> {
+        return parameter1 + parameter2;
+    }
+);
+// etc...
+```
+
+But probably the best way is to use [Functional Interfaces](https://www.baeldung.com/java-8-functional-interfaces), which are basically just an interface definition which contain a single method, but can be used with more succinct syntax.  Actually the 'MathsOperationImplementation' interface definition above is a functional interface, so the creation of the implementations could use a lambda rather than an anonymous class like this...
+
+```java
+    mathsOperationImplementations.put(
+        MathsOperation.ADD, 
+        (double parameter1, double parameter2) -> {
+            return parameter1 + parameter2;
+        }
+    );
+```
+
+This is not unlike oldschool delegates in C#... you can use a lambda to have succinct definition, only requiring definition of the functional interface (similar to how a delegate had to be declared in C#).
+
+The 'zoo' variation of this was used in ApplicationAccessJavaClient...
+
+```java
+var statusCodeToExceptionThrowingActionMap = new HashMap<Integer, Consumer<HttpErrorResponse>>();
+statusCodeToExceptionThrowingActionMap.put(
+    Integer.valueOf(500), // Internal Server Error
+    (HttpErrorResponse httpErrorResponse) -> {  
+        throw new RuntimeException(httpErrorResponse.getMessage());
+    }
+);
+statusCodeToExceptionThrowingActionMap.put(
+    Integer.valueOf(400), // Bad Request
+    (HttpErrorResponse httpErrorResponse) -> {  
+        if (httpErrorResponse.getCode().equals("ArgumentNullException")) {
+            throw new NullPointerException(httpErrorResponse.getMessage());
+        }
+        else {
+            throw new IllegalArgumentException(httpErrorResponse.getMessage());
+        }
+    }
+);
+// etc...
+```
+
 #### Exception equivalent to C#
 
 | C# Exception | Java Error/Exception | Notes |
