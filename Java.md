@@ -92,6 +92,58 @@ String.format(
 )
 ```
 
+#### C# Tuple equivalent
+
+Basically there's no equivalent.  You have to create specific container/model classes.
+
+#### C# IEnumerable&lt;T&gt; equivalent
+
+The [Iterable&lt;T&gt;](https://docs.oracle.com/javase/8/docs/api/java/lang/Iterable.html) interface allows the implementing class to be used in the [for-each loop](https://docs.oracle.com/javase/8/docs/technotes/guides/language/foreach.html).  See example below...
+
+
+```java
+/**
+ * Implements {@link Iterable} and {@link Iterator}, applying a specified conversion function to each element in an {@link ArrayList}.
+ * 
+ * @param <TIn> The type of the elements in the {@link ArrayList}.
+ * @param <TOut> The type the elements of the {@link ArrayList} are converted to.
+ */
+protected class ArrayListIteratorConverter<TIn, TOut> implements Iterable<TOut>, Iterator<TOut> {
+
+    protected ArrayList<TIn> inputArray;
+    protected Function<TIn, TOut> conversionFunction;
+    protected int currentIndex;
+
+    /**
+     * Constructs an ArrayListIteratorConverter.
+     * 
+     * @param inputArray The {@link ArrayList} to apply the conversion function to.
+     * @param conversionFunction A function which converts elements of the {@link ArrayList} to type {@link TOut}
+     */
+    public ArrayListIteratorConverter(ArrayList<TIn> inputArray, Function<TIn, TOut> conversionFunction) {
+        this.inputArray = inputArray;
+        this.conversionFunction = conversionFunction;
+        currentIndex = 0;
+    }
+
+    @Override
+    public Iterator<TOut> iterator() {
+        return this;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return (currentIndex < inputArray.size());
+    }
+
+    @Override
+    public TOut next() {
+        currentIndex++;
+        return conversionFunction.apply(inputArray.get(currentIndex - 1));
+    }
+}
+```
+
 #### C# Action and Func equivalents
 
 You have the [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html), [Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html), [Consumer](https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html), and [Predicate](https://docs.oracle.com/javase/8/docs/api/java/util/function/Predicate.html) interfaces, but they don't support varying numbers of generic parameters, so usefulness is limited.  These are part of the so-called 'zoo' of [various function interfaces](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html).

@@ -184,14 +184,14 @@ if (param_val is None or not param_val or param_val.isspace() == True):
 
 #### Mocks in unit tests
 
-1. Import Mock and/or MagicMock (see [here](https://docs.python.org/3/library/unittest.mock.html#the-mock-class) and [here](https://docs.python.org/3/library/unittest.mock.html#magicmock-and-magic-method-support) for differences) and the 'patch' annotation...
+1. Import Mock and/or MagicMock (see [here](https://docs.python.org/3/library/unittest.mock.html#the-mock-class) and [here](https://docs.python.org/3/library/unittest.mock.html#magicmock-and-magic-method-support) for differences) and the 'patch' decorator...
 
 
 ```python
 from unittest.mock import MaggicMock, Mock, patch
 ```
 
-2. Annotate each test method that needs to use the mock with the 'patch' annotation.  In below case the 'requests' library is being mocked.  Need to put the full path to the requests instance to mock as the parameter to 'patch'... implemented under the covers by some [tricky dynamic importing and overriding](https://docs.python.org/3/library/unittest.mock.html#patch).  That then results in the mocked object being passed as a parameter to the same test method, so need to capture that.  Also see [other variations of patch](https://docs.python.org/3/library/unittest.mock.html#the-patchers)...
+2. Decorate each test method that needs to use the mock with the 'patch' decoration.  In below case the 'requests' library is being mocked.  Need to put the full path to the requests instance to mock as the parameter to 'patch'... implemented under the covers by some [tricky dynamic importing and overriding](https://docs.python.org/3/library/unittest.mock.html#patch).  That then results in the mocked object being passed as a parameter to the same test method, so need to capture that.  Also see [other variations of patch](https://docs.python.org/3/library/unittest.mock.html#the-patchers)...
 
 ```python
 @patch("access_manager_client.requests")
