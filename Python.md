@@ -15,6 +15,14 @@ Each folder should have an '__init.py__' file with a comment describing the pack
 """
 ```
 
+#### Imports
+
+For files/modules in the local project, always use the full path to the files/modules relative to the 'PYTHONPATH' environment variable...
+
+```
+from src.exceptions.element_not_found_error import ElementNotFoundError
+```
+
 #### Asserting an inner exception's message in unit tests
 
 ```python
@@ -149,7 +157,13 @@ python -m unittest discover -s .\src\tests -p "*_tests.py"
 To run a single test.  Specify the test file name and the test method name (including the class/module name prefix)...
 
 ```
-python src\tests\access_manager_client_integration_tests.py AccessManagerClientIntegrationTests.test_add_elements_and_mappings
+python -m unittest src.tests.access_manager_client_integration_tests.AccessManagerClientIntegrationTests.test_connection_exceptions
+```
+
+To run a single test module/file.  Specify the test file name...
+
+```
+python -m unittest src.tests.access_manager_client_integration_tests
 ```
 
 #### Route execution of a test to unittest.main()
