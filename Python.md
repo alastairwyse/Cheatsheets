@@ -126,6 +126,28 @@ class AccessManagerClient(AccessManagerClientBase, AccessManagerEventProcessor, 
 
 As per [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#3164-guidelines-derived-from-guidos-recommendations)
 
+#### Enums
+
+```python
+from enum import Enum
+
+class HTTPMethod(Enum):
+    """Represents an HTTP method.
+    """
+    GET = "GET", 
+    POST = "POST", 
+    DELETE = "DELETE"
+```
+
+#### With statement
+
+Automatically calls close() method when finished... similar to C# 'using'...
+
+```python
+with open("file_path", "w") as file:
+    file.write("hello world !")
+```
+
 #### Exception equivalent to C#
 
 | C# Exception | Python Error/Exception | Notes |
@@ -188,7 +210,7 @@ if (param_val is None or not param_val or param_val.isspace() == True):
 
 
 ```python
-from unittest.mock import MaggicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 ```
 
 2. Decorate each test method that needs to use the mock with the 'patch' decoration.  In below case the 'requests' library is being mocked.  Need to put the full path to the requests instance to mock as the parameter to 'patch'... implemented under the covers by some [tricky dynamic importing and overriding](https://docs.python.org/3/library/unittest.mock.html#patch).  That then results in the mocked object being passed as a parameter to the same test method, so need to capture that.  Also see [other variations of patch](https://docs.python.org/3/library/unittest.mock.html#the-patchers)...
