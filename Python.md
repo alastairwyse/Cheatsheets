@@ -139,6 +139,22 @@ class HTTPMethod(Enum):
     DELETE = "DELETE"
 ```
 
+#### F-strings
+
+Can be used to substitute variables into strings inline (instead of using format())...
+
+```python
+raise Exception(f"Failed to call URL '{request_url}' with '{str(HTTPMethod.GET.name)}' method.") from exc
+```
+
+#### Incrementing
+
+Python doesn't support ++ (etc...) like other langauges.  Instead you can do this...
+
+```python
+myNumber += 1
+```
+
 #### With statement
 
 Automatically calls close() method when finished... similar to C# 'using'...
