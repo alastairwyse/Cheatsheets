@@ -296,6 +296,52 @@ TaskDoesntExistException e = assertThrows(TaskDoesntExistException.class, () ->
 assertTrue(e.getMessage().contains(String.format("A task with id '%s' does not exist in the task manager.", testTask.getId())));
 ```
 
+#### Mocking in unit tests
+
+Import Mockito by adding this to the Maven pom file...
+
+```
+<dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-core</artifactId>
+    <version>5.14.2</version>
+    <scope>test</scope>
+</dependency>
+```
+
+Setup mocks within the test class like below...
+
+```java
+private NanoTimeProvider mockNanoTimeProvider;
+
+@Before
+public void setUp() {
+
+    mockNanoTimeProvider = Mockito.mock(NanoTimeProvider.class);
+    testMetricLogger = new TestMetricLogger(mockNanoTimeProvider);
+}
+```
+
+...then define returns from method calls, and verify calls within a test method like this...
+
+```java
+Mockito.when(mockNanoTimeProvider.nanoTime()).thenReturn(100L, 200L, 50200L, 100100L);
+var testInterval1 = new TestDiskWriteTimeMetric();
+var testInterval2 = new TestMessageProcessingTimeMetric();
+UUID testBeginId1 = testMetricLogger.begin(testInterval1);
+UUID testBeginId2 = testMetricLogger.begin(testInterval2);
+
+testMetricLogger.end(testBeginId2, testInterval2);;
+testMetricLogger.end(testBeginId1, testInterval1);;
+
+assertEquals(2, testMetricLogger.LogIntervalParameters.size());
+assertSame(testInterval2, testMetricLogger.LogIntervalParameters.get(0).Metric);
+assertEquals(50000L, testMetricLogger.LogIntervalParameters.get(0).Value);
+assertSame(testInterval1, testMetricLogger.LogIntervalParameters.get(1).Metric);
+assertEquals(100000L, testMetricLogger.LogIntervalParameters.get(1).Value);
+Mockito.verify(mockNanoTimeProvider, times(4)).nanoTime();
+```
+
 #### Inheriting base method documentation and decorating with implementation-specific method details 
 
 ```java
