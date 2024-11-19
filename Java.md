@@ -38,6 +38,10 @@ try(BufferedReader inputReader = new BufferedReader(new InputStreamReader(System
 }
 ```
 
+#### Constants
+
+Follow [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html#s5.2.4-constant-names).
+
 #### Inner classes
 
 Just declare within the body of another class... similar to C#...
