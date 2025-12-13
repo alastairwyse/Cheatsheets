@@ -12,7 +12,7 @@ import "Models/Protos/temporal_event_buffer_items.proto";
 
 At a high level, follow the [Codegen Integration Into .NET Build](https://chromium.googlesource.com/external/github.com/grpc/grpc/+/HEAD/src/csharp/BUILD-INTEGRATION.md#getting-started) documentation to enable building the gRPC generated code.  Basically you need to...
 
-1. Import the 'Grpc.Tools' NuGet package, and include something similar to the below in the .csproj file 'PackageReference' definition...
+1. Import the ['Grpc.Tools' NuGet package](https://www.nuget.org/packages/grpc.tools/), and include something similar to the below in the .csproj file 'PackageReference' definition...
 
 ```XML
 <PackageReference Include="Grpc.Tools" Version="2.72.0">
@@ -38,7 +38,7 @@ A few gotchas and hints to make things work smoothly...
 <Protobuf Include="..\ApplicationAccess.Hosting.Grpc\Protos\event_cache_v1.proto" ProtoRoot="..\ApplicationAccess.Hosting.Grpc" Link="Protos\event_cache_v1.proto" GrpcServices="Server" />
 ```
 
-Reason is that gRPC will end up generating two versions of the same code, which although they are from the same source, .NET recognizes and different, but conflicting complied code.  This may not trip you up so much in the runtime client and server code (as they'd typically exist in separate namespaces and/or projects), but in things like integration tests where you may well import both it can become a problem.  The typical symptom is an error message like below when trying to declare a variable of conflicting type...
+Reason is that duplicate declarations will cause gRPC to generate two instances of the same code, which although they are from the same source, .NET recognizes and different, but conflicting complied code.  This may not trip you up so much in the runtime client and server code (as they'd typically exist in separate namespaces and/or projects), but in things like integration tests where you may well import both it can become a problem.  The typical symptom is an error message like below when trying to declare a variable of conflicting type...
 
 ```
 CS0436: The type 'X' in '{namespace Y}' conflicts with the imported type 'Y' in '{namespace Z}'.
@@ -51,7 +51,7 @@ service EventCache {
 	rpc GetAllEventsSince (etc...)
 ```
 
-...this would be built/generated in the ApplicationAccess.Hosting.Grpc.EventCache namespace/project which contains the server-side implementation of the EventCache, BUT the generated service class name is the same as the namespace... which leads to compiler ambiguities and failures as the project gets referenced and expanded.
+...if you build/generate the C# code from this proto file into the ApplicationAccess.Hosting.Grpc.EventCache namespace/project which contains the server-side implementation of the EventCache, the generated service class name is the same as the namespace... which leads to compiler ambiguities and failures as the project gets referenced and expanded.
 
 A better approach is to have all the generated code created in it's own dedicated namespace.  This can be achieved by setting a 'package' declaration in the proto file like below...
 
@@ -59,7 +59,7 @@ A better approach is to have all the generated code created in it's own dedicate
 package ApplicationAccess.Hosting.Grpc.GeneratedCode.EventCache.V1;
 ```
 
-...then all the generated code is created once in its own dedicated namespace, and can be selectively imported into client code just as an non-gemnerated class library would be.
+...then all the generated code is created once in its own dedicated namespace, and can be selectively imported into client code just as any non-generated class library could.
 
 For the EventCache, I ended up with the following 4 projects/namespaces, which followed clean separation of concerns and avoided the issues discussed above...
 
@@ -101,7 +101,6 @@ message GrpcError {
 The custom GrpcError needs to be wrapped in a Google.Rpc.Status object (which includes a status code and message similar to the RpcException object used in standard error handling), and then this converted to an RpcException to pass the rich exception from the server-side.  This is [clearly covered in the documentation](https://learn.microsoft.com/en-us/aspnet/core/grpc/error-handling?view=aspnetcore-8.0#creating-rich-errors-on-the-server), and implemented in ApplicationAccess in the [ExceptionToGrpcStatusConverter](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/ExceptionToGrpcStatusConverter.cs) and [ExceptionHandlingInterceptor](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/ExceptionHandlingInterceptor.cs) classes...
 
 ```C#
-
 // From ExceptionHandlingInterceptor...
 
 public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>
@@ -167,7 +166,7 @@ builder.Services.AddGrpc(options =>
 
 #### Interceptors as Singletons
 
-By default Interceptor classes have a per-request scope/lifetime... i.e. by default an ExceptionHandlingInterceptor class (added above) would be created for every new request.  But for the ExceptionHandlingInterceptor this doesn't work as is, since it needs needs to keep state... i.e. mappings from .NET Exceptions to RpcExceptions.  These are set via constructor parameters to the ExceptionHandlingInterceptor class, so you could register the parameters as services and have DI automatically pass them to the constructor, BUT there's no value re-instantiating a ExceptionHandlingInterceptor with every request when it could just be created once.  So if you [register a singleton instance of an Interceptor class](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/ApplicationInitializer.cs#L118) (before Add()ing it), gRPC will use that instance, rather than recreating.  I.e...
+By default Interceptor classes have a per-request scope/lifetime... i.e. by default an ExceptionHandlingInterceptor class (added above) would be created for every new request.  But for the ExceptionHandlingInterceptor this doesn't work as is, since it needs needs to hold configuration... i.e. mappings from .NET Exceptions to RpcExceptions.  These are set via constructor parameters to the ExceptionHandlingInterceptor class, so you could register the parameters as services and have DI automatically pass them to the constructor, BUT there's no value re-instantiating a ExceptionHandlingInterceptor with every request when it could just be created once.  So if you [register a singleton instance of an Interceptor class](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/ApplicationInitializer.cs#L118) (before Add()ing it), gRPC will use that instance, rather than recreating.  I.e...
 
 ```
 ExceptionHandlingInterceptor exceptionHandlingInterceptor = new(errorHandlingOptions, exceptionToGrpcStatusConverter);
@@ -180,7 +179,7 @@ There is quite detailed [Microsoft documentation](https://learn.microsoft.com/en
 
 I found that you can utilize the [WebApplicationFactory](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0&pivots=nunit#basic-tests-with-the-default-webapplicationfactory) class to create and run an in-memory ASP.NET web application, and then call the CreateClient() method on the resulting [TestServer](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.testhost.testserver?view=aspnetcore-8.0) object to get a HttpClient which will connect to that web application (this is what I do for the ApplicationAccess REST integration tests).  This is implemented in the [IntegrationTestsBase](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc.EventCache.IntegrationTests/IntegrationTestsBase.cs) class.
 
-The tricky hurdle to overcome is that obtaining the HttpClient via the CreateClient() alone will give you a HttpClient, but it won't work for gRPC calls.  In addition, you have to set the [HttpMessageHandler](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpmessagehandler?view=net-8.0) via the [GrpcChannelOptions](https://grpc.github.io/grpc/csharp-dotnet/api/Grpc.Net.Client.GrpcChannelOptions.html) when creating the gRPC client.  The HttpMessageHandler is obtained from the TestServer in the [IntegrationTestsBase.OneTimeSetUp()](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc.EventCache.IntegrationTests/IntegrationTestsBase.cs#L52) method...
+The tricky hurdle to overcome is that obtaining the HttpClient via the CreateClient() alone will give you a HttpClient, but that client will fail with gRPC requests.  To overcome, you have to set the [HttpMessageHandler](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpmessagehandler?view=net-8.0) via the [GrpcChannelOptions](https://grpc.github.io/grpc/csharp-dotnet/api/Grpc.Net.Client.GrpcChannelOptions.html) when creating the gRPC client.  The HttpMessageHandler is obtained from the TestServer in the [IntegrationTestsBase.OneTimeSetUp()](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc.EventCache.IntegrationTests/IntegrationTestsBase.cs#L52) method...
 
 ```C#
 httpClient = testEventCache.CreateClient();
@@ -207,7 +206,7 @@ Then the channel needs to be passed to the constructor of the gRPC client class 
 var client = new EventCacheRpc.EventCacheRpcClient(channel);
 ```
 
-Sample test methods [here](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc.EventCache.IntegrationTests/RpcTests.cs).
+Sample integration test methods [here](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc.EventCache.IntegrationTests/RpcTests.cs).
 
 #### Kubernetes Health Checks
 
@@ -215,7 +214,7 @@ gRPC has its own defined [health checking protocol](https://github.com/grpc/grpc
 
 To then register TripSwitchHealthCheck within ASP.NET I did the following (from the [ApplicationInitializer](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/ApplicationInitializer.cs) class)...
 
-1. Instantiate a TripSwitchHealthCheck (need to pass the actuator to the constructor) and register it in DI as a singleton (for the same reason as described for 'Interceptors as Singletons' as above... if you want the IHealthCheck implementation to have longer than per-request scope/lifetime, you need to register an instance of the class)...
+1. Instantiate a TripSwitchHealthCheck (need to pass the actuator to the constructor) and register it in DI as a singleton (for the same reason as described for [Interceptors as Singletons](#interceptors-as-singletons) as above... if you want the IHealthCheck implementation to have longer than per-request scope/lifetime, you need to register an instance of the class as a singleton)...
 
 ```C#
 // Add gRPC health checks (using the TripSwitch to report the health)
@@ -235,7 +234,7 @@ builder.Services.AddGrpcHealthChecks().AddCheck<TripSwitchHealthCheck>("TripSwit
 app.MapGrpcHealthChecksService();
 ```
 
-There was one issue with in the ApplicationAccess context... if I remember correctly, the health check seemed to be registered in the request pipeline downstream of my custom Interceptors, including the [TripSwitchInterceptor](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/TripSwitchInterceptor.cs).  This meant that once the tripswitch was tripped/actuated, the TripSwitchInterceptor would intercept the health check request and throw its configured 'when tripped' exception, rather than reponding negatively to the health check request inline with the gRPC protocol.  To overcome this, I modified TripSwitchInterceptor to attempt to identify of the incoming request was a health check request, and if so bypass the trip swicth functionality, passing to the next handler in the request pipeline.  Identifying the request as a health check request is done via the prefix of the RPC method name, which is subject to external change, but this works for the time being.  Extracts from the [TripSwitchInterceptor](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/TripSwitchInterceptor.cs) class below...
+There was one issue with this in the ApplicationAccess context... if I remember correctly, the health check seemed to be registered in the request pipeline downstream of my custom Interceptors, including the [TripSwitchInterceptor](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/TripSwitchInterceptor.cs).  This meant that once the tripswitch was tripped/actuated, the TripSwitchInterceptor would intercept the health check request and throw its configured 'when tripped' exception, rather than reponding negatively to the health check request inline with the gRPC protocol.  To overcome this, I modified TripSwitchInterceptor to attempt to identify whether the incoming request was a health check request, and if so bypass the trip swicth functionality, passing to the next handler in the request pipeline.  Identifying the request as a health check request is done via the prefix of the RPC method name, which is subject to external change, but this works for the time being.  Extracts from the [TripSwitchInterceptor](https://github.com/alastairwyse/ApplicationAccess/blob/15c32d8875683aa92a14044045df3e47d723b7cb/ApplicationAccess.Hosting.Grpc/TripSwitchInterceptor.cs) class below...
 
 ```C#
 /// <summary>The gRPC health checking protocol service definition package name prefix.</summary>
@@ -285,25 +284,26 @@ public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>
 
 ```
 
-#### TODOgoo
+#### Running without HTTPS / TLS
 
-Need to have Kestral config for http2 (maybe only required if not using HTTPS)
+In ApplicationAccess, all endpoints are exposed via plain HTTP, not HTTPS.  This is a deliberate design decision, as transport encryption is considered a concern of hosting infrastructure rather than the application (and many good infrastructure-based solutions are available, e.g. HTTPS/TLS termination via a Kubernetes Ingress).
 
-    Transient fault handling for GRPC retries
-      https://learn.microsoft.com/en-us/aspnet/core/grpc/retries?view=aspnetcore-9.0
-    Error handling with GRPC
-      https://learn.microsoft.com/en-us/aspnet/core/grpc/error-handling?view=aspnetcore-9.0
-      Can I just reuse (derive from) StatusControllerBase
-    GRPC services with asp.net core
-      https://learn.microsoft.com/en-au/aspnet/core/grpc/aspnetcore?view=aspnetcore-9.0&tabs=visual-studio
-    Might need internediary DTO classes generated from a proto file
+gRPC services in ASP.NET Core can be run without HTTPS (e.g. by providing a plain HTTP URL to the 'urls' parameter on startup), but may result in the following exception when the gRPC service is called...
 
-Getting non-TLS to work (maybe had to update launch settings... re search for that error I was getting) 
-  Possibly https://stackoverflow.com/questions/57602807/how-to-turn-off-https-on-grpc-server
+```
+Error starting gRPC call. HttpRequestException: The HTTP/2 server closed the connection. HTTP/2 error code 'HTTP_1_1_REQUIRED' (0xd).
+```
 
-Caution of arrays of base classes
+Assuming Kestral is used for hosting the service, this can be resolved by adding the below configuration to appsettings.json...
 
-Add colours 
-  https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#supported-color-models
+```XML
+"Kestrel": {
+  "EndpointDefaults": {
+    "Protocols": "Http2"
+  }
+}
+```
 
-Retries
+#### Transient Error Handling
+
+TODO.  See https://learn.microsoft.com/en-us/aspnet/core/grpc/retries?view=aspnetcore-8.0
