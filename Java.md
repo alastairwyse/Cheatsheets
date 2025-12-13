@@ -84,6 +84,14 @@ protected <T> T getIterableElement(Iterable<T> iterable, int index) {
 }
 ```
 
+#### Generic type wildcards
+
+TODO
+
+#### 'Class' class
+
+TODO: Compare to C# Type
+
 #### String value substitution
 
 Use String.format()...
