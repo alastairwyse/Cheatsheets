@@ -284,6 +284,8 @@ public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>
 
 ```
 
+This health check responds to [gRPC probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-grpc-liveness-probe) in Kubernetes.
+
 #### Running without HTTPS / TLS
 
 In ApplicationAccess, all endpoints are exposed via plain HTTP, not HTTPS.  This is a deliberate design decision, as transport encryption is considered a concern of hosting infrastructure rather than the application (and many good infrastructure-based solutions are available, e.g. HTTPS/TLS termination via a Kubernetes Ingress).
