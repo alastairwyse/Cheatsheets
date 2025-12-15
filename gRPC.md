@@ -1,4 +1,4 @@
-### Lessons Learned from gRPC Implemenetation in [ApplicationAccess](https://github.com/alastairwyse/ApplicationAccess)
+### Lessons Learned from gRPC Implementation in [ApplicationAccess](https://github.com/alastairwyse/ApplicationAccess)
 
 #### Proto Files
 
