@@ -36,6 +36,21 @@ self.assertEqual("Inner exception message.", str(result.exception.__context__))
 
 Create a 'tests' folder within the package's folder
 
+#### Check that a variable is of a specific type
+
+And also getting the 'inner' exception ('cause') from an exception.  N.b. [CalledProcessError](https://docs.python.org/3/library/subprocess.html#subprocess.CalledProcessError) is a class in the [subprocess module](https://docs.python.org/3/library/subprocess.html)...
+
+```python
+try:
+    subfolders = command_executor.execute_operating_system_command("ls -d */ -1", tar_folder_path)
+except Exception as exc:
+    subfolders_exist: bool = True
+    if (exc.__cause__ is not None):
+        if (type(exc.__cause__) == CalledProcessError):
+            if (exc.__cause__.returncode == 2):
+                subfolders_exist = False
+```
+
 #### Preventing false positive errors for type hints
 
 'assert' statement...
