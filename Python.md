@@ -23,15 +23,6 @@ For files/modules in the local project, always use the full path to the files/mo
 from src.exceptions.element_not_found_error import ElementNotFoundError
 ```
 
-#### Asserting an inner exception's message in unit tests
-
-```python
-with self.assertRaises(Exception) as result:
-    (statement whichs throws exception)
-
-self.assertEqual("Inner exception message.", str(result.exception.__context__))
-```
-
 #### Unit tests folder structure
 
 Create a 'tests' folder within the package's folder
@@ -130,6 +121,12 @@ Class definition should be indented within another class, and follow the convent
                 raise ValueError("Unhandled ApplicationScreen value '{0}'.".format(input_object))
 ```
 
+Also need to use 'self' when instantiating...
+
+```python
+    stringifier = self._ApplicationScreenUniqueStringifier()
+```
+
 #### Syntax for class constants
 
 ```python
@@ -192,6 +189,15 @@ with self.assertRaises(ValueError) as result:
     list(self._test_json_dict_to_iterable_converter.convert_to_iterable(test_input_list, StringUniqueStringifier(), "AccessLevel")) # type: ignore
 
 self.assertEqual("Element of parameter 'input_list' does not contain key 'AccessLevel'.", str(result.exception))
+```
+
+#### Asserting an inner exception's message in unit tests
+
+```python
+with self.assertRaises(Exception) as result:
+    (statement whichs throws exception)
+
+self.assertEqual("Inner exception message.", str(result.exception.__context__))
 ```
 
 #### Running unit tests
@@ -265,5 +271,54 @@ mock_response.status_code = 201
 mock_response.text = "ok"
 mock_requests.post.return_value = mock_response
 ```
+
+#### Basic Loops
+
+C# 'foreach' equivalent...
+
+```python
+for current_user_entities in self._user_to_entity_map.values():
+    if entity_type in current_user_entities:
+        current_user_entities.pop(entity_type)
+```
+
+...subject of the iteration must implement [__iter__()](https://docs.python.org/3/library/functions.html#iter)
+
+Can use the range() function for more traditional for loops...
+
+```python
+for i in range(0, 10):
+    print(i)
+```
+
+#### Getter and Setter Equivalents (@property)
+
+```python
+class _CityAndTemperature():
+
+    _city: str
+    _temperature: int
+
+    def __init__(self, city: str, temperature: int) -> None:
+        
+        # TODO: Checks for blank/empty city
+
+        self._city = city
+        self._temperature = temperature
+
+    @property
+    def city(self) -> str:
+        return self._city
+    
+    
+    @property
+    def temperature(self) -> int:
+        return self._temperature
+    
+    @temperature.setter
+    def temperature(self, new_temperature: int) -> None:
+        self._temperature = new_temperature
+```
+
 
 TODO: Asserting mocks were called with certain parameters and specified numbers of times.
