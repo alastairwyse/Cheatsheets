@@ -291,6 +291,8 @@ for i in range(0, 10):
     print(i)
 ```
 
+**REALLY IMPORTANT!!** - The second parameter to the range() method above is **NOT inclusive!**
+
 #### Getter and Setter Equivalents (@property)
 
 ```python
