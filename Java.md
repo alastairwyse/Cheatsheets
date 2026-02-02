@@ -412,6 +412,69 @@ public int hashCode() {
 }
 ```
 
+#### Avoiding Getter and Setter Boilerplate
+
+For pre Java 17 can use...
+
+* [Lombok](https://projectlombok.org/features/GetterSetter) - Define getters and setters with annotations.
+
+For Java 17 and after can use [record types](https://docs.oracle.com/en/java/javase/17/language/records.html) which automatically generate constructor and getters (constructor defined below to include exception handlers, but can be omitted)...
+
+```java
+/**
+ * Container/model class holding a line of text and a count of the number of words within the text.
+ * 
+ * @param textLine The line of text.
+ * @param wordCount The number of words in the text.
+ */
+protected record TextLineAndWordCount(String textLine, int wordCount) {
+    public TextLineAndWordCount {
+        if (textLine == null) 
+            throw new IllegalArgumentException("Parameter 'textLine' cannot be null.");
+        if (wordCount < 0) 
+            throw new IllegalArgumentException(String.format("Parameter 'wordCount' with value %d must be greater than or equal to 0.", wordCount));
+    }
+}
+```
+
+That is equivalent to the following class definition...
+
+```java
+/**
+ * Container/model class holding a line of text and a count of the number of words within the text.
+ */
+protected class TextLineAndWordCount {
+
+    protected String textLine;
+    protected int wordCount;
+
+    public TextLineAndWordCount(String textLine, int wordCount) {
+        if (textLine == null) 
+            throw new IllegalArgumentException("Parameter 'textLine' cannot be null.");
+        if (wordCount < 0) 
+            throw new IllegalArgumentException(String.format("Parameter 'wordCount' with value %d must be greater than or equal to 0.", wordCount));
+
+        this.textLine = textLine;
+        this.wordCount = wordCount;
+    }
+
+    /**
+     * @return The line of text.
+     */
+    public String getTextLine() {
+        return textLine;
+    }
+
+    /**
+     * @return The number of words in the text.
+     */
+    public int getWordCount() {
+        return wordCount;
+    }
+}
+```
+
+
 #### Implementing hashCode() for model/container classes with multiple properties...
 
 Can use [Objects.hash()](https://docs.oracle.com/javase/8/docs/api/java/util/Objects.html#hash-java.lang.Object...-).  Seems to be similar to C# [HashCode.Combine()](https://learn.microsoft.com/en-us/dotnet/api/system.hashcode.combine?view=net-8.0).
