@@ -84,9 +84,89 @@ protected <T> T getIterableElement(Iterable<T> iterable, int index) {
 }
 ```
 
-#### Generic type wildcards
+#### Generic Type Constraints
 
-TODO
+Declared like this... again slightly different syntax to C#...
+
+```java
+public class BinarySearchTree<T extends Comparable<T>> {
+
+    // etc...
+}
+```
+
+#### Generic Type Wildcards
+
+Java lets you define a generic method in two ways as below...
+
+```java
+public int countListGenericWildcard(List<?> inputList)
+
+public <T> int countListGenericTyped(List<T> inputList)
+```
+
+If you don't care what the List in the above example contains, then these are functinonally equivalent.  E.g. forgetting that Lists already have a size() method, you could implement either of the above method signatures as follows...
+
+```java
+public int countListGenericWildcard(List<?> inputList) {
+
+    int returnCount = 0;
+    for (Object currentElement : inputList) {
+        returnCount++;
+    }
+
+    return returnCount;
+}
+
+public <T> int countListGenericTyped(List<T> inputList) {
+
+    int returnCount = 0;
+    for (T currentElement : inputList) {
+        returnCount++;
+    }
+
+    return returnCount;
+}
+```
+
+But where things differ is if you want to access/modify the contents of the List... see below...
+
+```java
+public <T> void reverseListGenericTyped(List<T> inputList) {
+
+    int lowIndex = 0;
+    int highIndex = inputList.size() - 1;
+    while (lowIndex < highIndex) {
+
+        T tempElement = inputList.get(highIndex);
+        inputList.set(highIndex, inputList.get(lowIndex));
+        inputList.set(lowIndex, tempElement);
+        lowIndex++;
+        highIndex--;
+    }
+}
+
+public void reverseListGenericWildcard(List<?> inputList) {
+
+    int lowIndex = 0;
+    int highIndex = inputList.size() - 1;
+    while (lowIndex < highIndex) {
+
+        Object tempElement = inputList.get(highIndex);
+        // Both lines below result in this compiler error: The method set(int, capture#3-of ?) in the type List<capture#3-of ?> is not applicable for the arguments (int, capture#4-of ?)
+        inputList.set(highIndex, inputList.get(lowIndex)); // Compiler error
+        inputList.set(lowIndex, tempElement);              // Compiler error
+        lowIndex++;
+        highIndex--;
+    }
+}
+```
+
+In the second case, although we can see that the type of tempElement is going to be the same as what's already in the List, the compiler cannot guarantee that... in the same way as if I tried to new up an instance of totally random type and set that on the List... the compiler prevents it.  In the 'typed' version, the compiler knows that the value being set is of type T... the same as what was retrieved in the line above.
+
+#### Covariance and Contravariance
+
+TODO: Compare to C# 'in' and 'out' in interface generic types
 
 #### 'Class' class
 
