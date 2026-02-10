@@ -21,6 +21,7 @@ Where REST doesn’t adapt so nicely is with application functions which _don’
 As mentioned above, CRUD operations are easy to implement.  [ApplicationAccess](https://github.com/alastairwyse/ApplicationAccess) exposes endpoints for CRUD operations on its primary data elements as follows...
 
 | URL Path | Method | Description |
+| -------- | ------ | ----------- |
 | /users/{user} | POST | Adds a user. |
 | /users/{user} | DELETE | Removes a user. |
 | /users/{user} | GET | Returns the specified user if it exists. |
