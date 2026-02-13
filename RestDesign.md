@@ -303,7 +303,7 @@ There may be a similar way to configure similar behaviour in Spring Boot.  I was
 
 #### 'Content-Type' Headers
 
-TODO!!
+Your API should respond with a [415 Unsupported Media Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/415) status if it receives a request body with data which doesn't match that specified in the request's 'Content-Type' header.
 
 ### Swagger Doco
 
