@@ -1,0 +1,3 @@
+Using GUIDs rather than numeric sequence numbers for DB primary keys... makes future merging of data easier, as no clashes, and no need to re-sequence.
+Random suffixes on hosted components (containers, pods, DBs) to allow multiple versions of the same to exist in parallel temporarily.
+When some common context needs to be passed between components in a serivice-based application... fine to pass that context at the top layers, but it should not be passed to lower layers that do core processing and shouldn't care out higher level run context issues like trace ids etc... (this isn't specifically a concern of scaled applications, but putting it here as a reminder... this needs to be documented somewhere).
