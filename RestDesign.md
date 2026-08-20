@@ -273,7 +273,7 @@ As a general rule, if you need to return non-JSON data from your REST API, and t
 
 #### Reject Requests for Unsupported MIME/media Types
 
-When creating REST APIs which only support JSON, it's easy for developers to ignore the 'accept' header, and just blindly return JSON regardless of what it contains.  This isn't good practice... if I client requests a specific data/content type, they expect to either receive that data/content type in the response, or a [406 Not Acceptable](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/406) error status.  This is simple enough to implement in ASP.NET by firstly annotating your controller methods with the [Produces attribute](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.producesattribute?view=aspnetcore-10.0), e.g...
+When creating REST APIs which only support JSON, it's easy for developers to ignore the 'accept' header, and just blindly return JSON regardless of what it contains.  This isn't good practice... if a client requests a specific data/content type, they expect to either receive that data/content type in the response, or a [406 Not Acceptable](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/406) error status.  This is simple enough to implement in ASP.NET by firstly annotating your controller methods with the [Produces attribute](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.producesattribute?view=aspnetcore-10.0), e.g...
 
 ```c#
 /// <summary>
