@@ -8,3 +8,8 @@
 * But (arguably) the downside of the event-based / reactive approach is how do you guarantee the control event will be received... e.g. what if the Kafka consumer stops consuming (which we saw happening once in the above system)?  With an explicit call (e.g. REST-based) it's easier to recognise/handle failures... sending explicitly waits for a response, and can act appropriately if an error happens.
 * The 'reload shard configuration' event in AppAccess DistOpCoord is triggered from a worker thread.  If the process on the worker thread ever encounters an error, it throws the trip switch, which can be configured to shutdown the DistOpCoord, or return an error response to any future requests (which would propagate the effect of the error further through the system).
 * In the event-based / reactive approach how can you monitor/check errors if your consumer just gets 'locked up'... if you haven't received an event for X minutes or hours, how do you know whether that's normal or the result of a consumption problem?
+
+### Event-based Systems
+* Is Kafka really the right choice for systems where order of events must be maintained?..  since order across paritions of the same topic is not guaranteed?
+* Is Kafka really the right choice for systems where you require exactly once delivery?  Review https://www.confluent.io/blog/exactly-once-semantics-are-possible-heres-how-apache-kafka-does-it/ 
+* Stuff like market data ticks are a potential good use case... you just care about the current status/price/value... you don't care so much about the chronology/order.  In other systems you do care about this... e.g. you must create a basic entity befor you create a mapping from that entity.

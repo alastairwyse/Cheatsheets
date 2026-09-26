@@ -23,9 +23,6 @@ Explain generally about approach of moving previous events in batches and then s
 
 Maybe discuss troubles with previous approach of trying to merge into existing... maybe go into pluses and minuses of having dedicated tables for primary elements.
 
-Also think about some of the base features of AppAccess which make redistribution easier... like maybe the rest exception Jason format and rethrowing of exceptions... anything like that which aids redistribution.
-Maybe have a precursors/requirements section... including this exception rehydration... hmmm is that a precursor for splitting tho??
-
 Talk about data model... pure event sourced vs traditional- storing only current state... being able to regenerate events
 
 Possibility of merging into existing node... may have been possible if using mongo style dB model with no lookup tables
@@ -39,3 +36,13 @@ General approach to scaling in distributed design... writers by sharing, readers
 Maybe mention about how locality of readers could be adjusted... I.e. put them physically near the client application to minimize network latency.
 
 Explain how events are cached and then read by reader within a shard group
+
+### Basic Principles
+Things that make re-distribution easier
+* Allow duplicates of (what should be) unique elements like databases and Kube pods.  Can be implemented with random suffixes.
+* Guids for elements ids.  Something that won't duplicate/overlap to allow easier data merging.
+* Rest exception Jason format and re-hydrating/rethrowing of exceptions
+* Err towards less normalization... single reference updates are costly and difficult with a normalized db and merging
+
+Whitepaper basic principles… allow dups of things… implement with tandom suffixes
+Use guids for ids… things which won’t overlap
